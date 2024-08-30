@@ -3,6 +3,13 @@
 @section('content')
     <div class="container">
         <h1>{{ $book->title }}</h1>
+        <div class="mb-3">
+            @if ($book->cover_image)
+                <img src="{{ asset('storage/' . $book->cover_image) }}" alt="Capa do Livro" style="max-width: 200px; height: auto; object-fit: cover;">
+            @else
+                <p>Sem imagem de capa disponível</p>
+            @endif
+        </div>
         <p><strong>Autor:</strong> {{ $book->author->name }}</p>
         <p><strong>Editora:</strong> {{ $book->publisher->name }}</p>
         <p><strong>Ano de Publicação:</strong> {{ $book->published_year }}</p>
@@ -20,4 +27,3 @@
         </form>
     </div>
 @endsection
-

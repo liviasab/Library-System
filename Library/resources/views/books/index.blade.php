@@ -7,6 +7,7 @@
         <table class="table table-bordered">
             <thead>
                 <tr>
+                    <th>Capa</th>
                     <th>Título</th>
                     <th>Autor</th>
                     <th>Editora</th>
@@ -17,6 +18,13 @@
             <tbody>
                 @foreach ($books as $book)
                     <tr>
+                        <td>
+                            @if ($book->cover_image)
+                                <img src="{{ asset('storage/' . $book->cover_image) }}" alt="Capa do Livro" style="width: 50px; height: 50px; object-fit: cover;">
+                            @else
+                                <span>Sem Capa</span>
+                            @endif
+                        </td>
                         <td>{{ $book->title }}</td>
                         <td>{{ $book->author->name }}</td>
                         <td>{{ $book->publisher->name }}</td>

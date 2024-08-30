@@ -7,6 +7,7 @@ use App\Models\Author;
 use App\Models\Publisher;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BookController extends Controller
 {
@@ -39,10 +40,16 @@ class BookController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'author_id' => 'required|integer',
-            'publisher_id' => 'required|integer',
+            'publisher_id' => 'nullable|integer',
             'published_year' => 'required|integer',
             'categories' => 'required|array',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        // Armazenar a imagem, se fornecida
+        if ($request->hasFile('cover_image')) {
+            $validatedData['cover_image'] = $request->file('cover_image')->store('covers', 'public');
+        }
 
         $book = Book::create($validatedData);
         $book->categories()->attach($request->categories);
@@ -69,9 +76,22 @@ class BookController extends Controller
             'publisher_id' => 'required|integer',
             'published_year' => 'required|integer',
             'categories' => 'required|array',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $book = Book::findOrFail($id);
+
+        // Remover imagem antiga, se existir e se uma nova imagem for enviada
+        if ($request->hasFile('cover_image')) {
+            if ($book->cover_image && Storage::exists('public/' . $book->cover_image)) {
+                Storage::delete('public/' . $book->cover_image);
+            }
+            $validatedData['cover_image'] = $request->file('cover_image')->store('covers', 'public');
+        } else {
+            // Se não há nova imagem e uma antiga já existe, manter a imagem antiga
+            $validatedData['cover_image'] = $book->cover_image;
+        }
+
         $book->update($validatedData);
         $book->categories()->sync($request->categories);
 
@@ -82,6 +102,20 @@ class BookController extends Controller
     public function destroy($id)
     {
         $book = Book::findOrFail($id);
+
+        // Remover imagem da capa, se existir
+        if ($book->cover_image) {
+            $filePath = 'public/' . $book->cover_image;
+            if (Storage::exists($filePath)) {
+                Storage::delete($filePath);
+            }
+        }
+
+        // Remover o caminho da imagem do banco de dados
+        $book->cover_image = null;
+        $book->save();
+
+        // Desassociar categorias e excluir o livro
         $book->categories()->detach();
         $book->delete();
 
