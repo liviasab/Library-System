@@ -8,6 +8,7 @@ use App\Models\Publisher;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 
 class BookController extends Controller
 {
@@ -28,6 +29,8 @@ class BookController extends Controller
     // Função para exibir o formulário de criação de um novo livro
     public function create()
     {
+        Gate::authorize('create', Book::class);
+
         $authors = Author::all();
         $publishers = Publisher::all();
         $categories = Category::all();
@@ -37,6 +40,8 @@ class BookController extends Controller
     // Função para armazenar um novo livro no banco de dados
     public function store(Request $request)
     {
+        Gate::authorize('create', Book::class);
+
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'author_id' => 'required|integer',
@@ -61,6 +66,8 @@ class BookController extends Controller
     public function edit($id)
     {
         $book = Book::findOrFail($id);
+        Gate::authorize('update', $book);
+
         $authors = Author::all();
         $publishers = Publisher::all();
         $categories = Category::all();
@@ -70,6 +77,9 @@ class BookController extends Controller
     // Função para atualizar um livro no banco de dados
     public function update(Request $request, $id)
     {
+        $book = Book::findOrFail($id);
+        Gate::authorize('update', $book);
+
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'author_id' => 'required|integer',
@@ -78,8 +88,6 @@ class BookController extends Controller
             'categories' => 'required|array',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
-        $book = Book::findOrFail($id);
 
         // Remover imagem antiga, se existir e se uma nova imagem for enviada
         if ($request->hasFile('cover_image')) {
@@ -102,6 +110,7 @@ class BookController extends Controller
     public function destroy($id)
     {
         $book = Book::findOrFail($id);
+        Gate::authorize('delete', $book);
 
         // Remover imagem da capa, se existir
         if ($book->cover_image) {

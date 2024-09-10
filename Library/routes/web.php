@@ -24,3 +24,5 @@ Route::resource('/categories', CategoryController::class);
 
 // Rotas para Publishers
 Route::resource('/publishers', PublisherController::class);
+
+Route::resource('users', UserController::class);

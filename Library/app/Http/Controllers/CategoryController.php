@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class CategoryController extends Controller
 {
@@ -24,12 +25,15 @@ class CategoryController extends Controller
     // Função para exibir o formulário de criação de uma nova categoria
     public function create()
     {
+        Gate::authorize('create', Category::class);
         return view('categories.create');
     }
 
     // Função para armazenar uma nova categoria no banco de dados
     public function store(Request $request)
     {
+        Gate::authorize('create', Category::class);
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255|unique:categories',
         ]);
@@ -43,17 +47,21 @@ class CategoryController extends Controller
     public function edit($id)
     {
         $category = Category::findOrFail($id);
+        Gate::authorize('update', $category);
+
         return view('categories.edit', compact('category'));
     }
 
     // Função para atualizar uma categoria no banco de dados
     public function update(Request $request, $id)
     {
+        $category = Category::findOrFail($id);
+        Gate::authorize('update', $category);
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255|unique:categories,name,' . $id,
         ]);
 
-        $category = Category::findOrFail($id);
         $category->update($validatedData);
 
         return redirect()->route('categories.index')->with('success', 'Categoria atualizada com sucesso!');
@@ -63,10 +71,11 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
+        Gate::authorize('delete', $category);
+
         $category->books()->detach();
         $category->delete();
 
         return redirect()->route('categories.index')->with('success', 'Categoria excluída com sucesso!');
     }
 }
-

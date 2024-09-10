@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Publisher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class PublisherController extends Controller
 {
@@ -24,12 +25,15 @@ class PublisherController extends Controller
     // Função para exibir o formulário de criação de uma nova editora
     public function create()
     {
+        Gate::authorize('create', Publisher::class);
         return view('publishers.create');
     }
 
     // Função para armazenar uma nova editora no banco de dados
     public function store(Request $request)
     {
+        Gate::authorize('create', Publisher::class);
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'nullable|string|max:255',
@@ -44,18 +48,22 @@ class PublisherController extends Controller
     public function edit($id)
     {
         $publisher = Publisher::findOrFail($id);
+        Gate::authorize('update', $publisher);
+
         return view('publishers.edit', compact('publisher'));
     }
 
     // Função para atualizar uma editora no banco de dados
     public function update(Request $request, $id)
     {
+        $publisher = Publisher::findOrFail($id);
+        Gate::authorize('update', $publisher);
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'address' => 'nullable|string|max:255',
         ]);
 
-        $publisher = Publisher::findOrFail($id);
         $publisher->update($validatedData);
 
         return redirect()->route('publishers.index')->with('success', 'Editora atualizada com sucesso!');
@@ -65,9 +73,10 @@ class PublisherController extends Controller
     public function destroy($id)
     {
         $publisher = Publisher::findOrFail($id);
+        Gate::authorize('delete', $publisher);
+
         $publisher->delete();
 
         return redirect()->route('publishers.index')->with('success', 'Editora excluída com sucesso!');
     }
 }
-

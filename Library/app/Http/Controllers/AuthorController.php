@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Author;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AuthorController extends Controller
 {
@@ -24,12 +25,15 @@ class AuthorController extends Controller
     // Função para exibir o formulário de criação de um novo autor
     public function create()
     {
+        Gate::authorize('create', Author::class);
         return view('authors.create');
     }
 
     // Função para armazenar um novo autor no banco de dados
     public function store(Request $request)
     {
+        Gate::authorize('create', Author::class);
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'birth_date' => 'nullable|date',
@@ -44,18 +48,22 @@ class AuthorController extends Controller
     public function edit($id)
     {
         $author = Author::findOrFail($id);
+        Gate::authorize('update', $author);
+
         return view('authors.edit', compact('author'));
     }
 
     // Função para atualizar um autor no banco de dados
     public function update(Request $request, $id)
     {
+        $author = Author::findOrFail($id);
+        Gate::authorize('update', $author);
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'birth_date' => 'nullable|date',
         ]);
 
-        $author = Author::findOrFail($id);
         $author->update($validatedData);
 
         return redirect()->route('authors.index')->with('success', 'Autor atualizado com sucesso!');
@@ -65,6 +73,8 @@ class AuthorController extends Controller
     public function destroy($id)
     {
         $author = Author::findOrFail($id);
+        Gate::authorize('delete', $author);
+
         $author->delete();
 
         return redirect()->route('authors.index')->with('success', 'Autor excluído com sucesso!');

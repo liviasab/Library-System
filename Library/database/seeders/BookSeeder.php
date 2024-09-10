@@ -25,7 +25,8 @@ class BookSeeder extends Seeder
             'title' => 'Dom Casmurro',
             'author_id' => $author1->id,
             'publisher_id' => $publisher1->id,
-            'published_year' => 1900
+            'published_year' => 1900,
+            'images'=> 'Test'
         ]);
 
         $book1->categories()->attach($category1->id);
