@@ -3,7 +3,9 @@
 @section('content')
     <div class="container">
         <h1>Lista de Autores</h1>
+        @cannot('isCliente', Auth::user())
         <a href="{{ route('authors.create') }}" class="btn btn-primary mb-3">Adicionar Novo Autor</a>
+        @endcan
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -25,6 +27,7 @@
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este autor?')">Excluir</button>
                             </form>
+                            @endcan
                         </td>
                     </tr>
                 @endforeach

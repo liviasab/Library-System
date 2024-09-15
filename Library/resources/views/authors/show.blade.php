@@ -11,12 +11,14 @@
             @endforeach
         </ul>
         <a href="{{ route('authors.index') }}" class="btn btn-primary">Voltar à Lista</a>
+        @can(!'isCliente', Auth::user())
         <a href="{{ route('authors.edit', $author->id) }}" class="btn btn-warning">Editar</a>
         <form action="{{ route('authors.destroy', $author->id) }}" method="POST" style="display:inline-block;">
             @csrf
             @method('DELETE')
             <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este autor?')">Excluir</button>
         </form>
+        @endcan
     </div>
 @endsection
 
